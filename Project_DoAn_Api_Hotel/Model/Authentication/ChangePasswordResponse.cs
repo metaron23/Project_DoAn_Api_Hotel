@@ -1,6 +1,4 @@
-﻿using Project_DoAn_Api_Hotel.Model;
-
-namespace Project_DoAn_Api_Hotel.Model.Authentication
+﻿namespace Project_DoAn_Api_Hotel.Model.Authentication
 {
     public class ChangePasswordResponse : Status
     {

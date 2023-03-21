@@ -3,7 +3,6 @@ using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
 using Project_DoAn_Api_Hotel.Model;
-using System.Net;
 
 namespace Project_DoAn_Api_Hotel.Repository.EmailRepository
 {

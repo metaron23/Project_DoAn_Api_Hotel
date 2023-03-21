@@ -1,59 +1,25 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Project_DoAn_Api_Hotel.Data;
-using Project_DoAn_Api_Hotel.Model;
-using Project_DoAn_Api_Hotel.Model.Authentication;
-using Project_DoAn_Api_Hotel.Models;
-using Project_DoAn_Api_Hotel.Repository.TokenRepository;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Project_DoAn_Api_Hotel.Repository.NotifiHub;
 
 namespace Project_DoAn_Api_Hotel.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]
     public class TestAuthenController : ControllerBase
     {
-        private readonly MyDBContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public TestAuthenController(MyDBContext context,
-            UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
-            SignInManager<ApplicationUser> signInManager
-            )
+        public TestAuthenController(IHubContext<ChatHub> hubContext)
         {
-            _context = context;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetData()
+        public async Task<IActionResult> SendMessage(string message)
         {
-            var user = await _userManager.FindByNameAsync("admin");
-            var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var userRole in userRoles)
-            {
-                await _userManager.AddClaimAsync(user,new Claim(ClaimTypes.Role, userRole));
-            }
-            var role = await _roleManager.FindByNameAsync("Admin");
-
-            await _userManager.AddClaimsAsync(user, new List<Claim>()
-            {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-            });
-
-            await _roleManager.AddClaimAsync(role, new Claim("Permission", "Blog.Create"));
-
-            return Ok(User.Claims);
+            await _hubContext.Clients.All.SendAsync("MessageReceived", message);
+            return Ok();
         }
     }
 }

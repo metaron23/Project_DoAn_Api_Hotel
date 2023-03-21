@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Project_DoAn_Api_Hotel.Data;
 using Project_DoAn_Api_Hotel.Model.Token;
@@ -101,10 +100,9 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
             tokenResponse.AccessToken = GetAccessToken(principal.Claims).TokenString!;
             tokenResponse.Status = true;
 
-            var newRefreshToken = GetRefreshToken();            
+            var newRefreshToken = GetRefreshToken();
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiry = DateTime.Now.AddMinutes(5);
-            tokenResponse.Expired = DateTime.Now.AddMinutes(5);
             _context.SaveChanges();
 
             tokenResponse.RefreshToken = newRefreshToken;
@@ -129,7 +127,7 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }

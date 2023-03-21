@@ -1,40 +1,47 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Project_DoAn_Api_Hotel.Controllers;
 using Project_DoAn_Api_Hotel.Data;
-using Project_DoAn_Api_Hotel.Repository.AuthenRepository;
-using Project_DoAn_Api_Hotel.Repository.EmailRepository;
-using Project_DoAn_Api_Hotel.Repository.TokenRepository;
+using Project_DoAn_Api_Hotel.Repository.NotifiHub;
 using Project_DoAn_Api_Hotel.Startup;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.SwaggerService();
+
 builder.Services.AddDbContext<MyDBContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
 
 builder.Services.IdentityService();
-builder = builder.AuthenJWTService();
+builder.AuthenJWTService();
 builder.Services.RepositoryService();
+builder.Services.AuthorService();
 
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
 app.UseHttpsRedirection();
-app.UseCors(option => option.WithOrigins("*").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapHub<ChatHub>("/hub");
+app.UseCors(builder =>
+{
+    builder.WithOrigins("http://127.0.0.1:5500")
+           .AllowAnyMethod()
+           .AllowAnyHeader()
+           .AllowCredentials();
+});
 app.UseAuthentication();
 app.UseAuthorization();
+
+
 app.MapControllers();
 app.Run();

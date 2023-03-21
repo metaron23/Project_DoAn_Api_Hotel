@@ -20,10 +20,10 @@ namespace Project_DoAn_Api_Hotel.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "User")]
         public IActionResult Get()
         {
-            return Ok();
+            return Ok("Đã vào thành công!");
         }
     }
 }

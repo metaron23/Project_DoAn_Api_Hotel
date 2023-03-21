@@ -12,4 +12,3 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
         bool Revoke(TokenRequest tokenRequest);
     }
 }
-    

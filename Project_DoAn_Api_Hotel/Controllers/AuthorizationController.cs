@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project_DoAn_Api_Hotel.Model;
 using Project_DoAn_Api_Hotel.Model.Authentication;
@@ -16,7 +15,7 @@ namespace Project_DoAn_Api_Hotel.Controllers
         private readonly IAuthenRepository _authenRepository;
         private readonly IMailRepository _mailRepository;
 
-        public AuthorizationController(IAuthenRepository authenRepository,IMailRepository mailRepository)
+        public AuthorizationController(IAuthenRepository authenRepository, IMailRepository mailRepository)
         {
             _authenRepository = authenRepository;
             _mailRepository = mailRepository;
@@ -25,13 +24,16 @@ namespace Project_DoAn_Api_Hotel.Controllers
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
-        {            
-            LoginResponse result = await _authenRepository.Login(model);
-            if(result.StatusCode == 1)
+        {
+            var result = await _authenRepository.Login(model);
+            if (result is LoginResponse)
             {
                 return Ok(result);
             }
-            return BadRequest(result);
+            else
+            {
+                return BadRequest(result);
+            }
         }
 
         [HttpPost]
@@ -39,7 +41,7 @@ namespace Project_DoAn_Api_Hotel.Controllers
         public async Task<IActionResult> Registration([FromBody] RegistrationModel model)
         {
             Status result = await _authenRepository.Registration(model);
-            if(result.StatusCode == 1)
+            if (result.StatusCode == 1)
             {
                 return Ok(result);
             }
@@ -85,7 +87,7 @@ namespace Project_DoAn_Api_Hotel.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmChangePassword(string? code, string? email, ChangePasswordModel changePasswordModel)
         {
-            return Ok(await _authenRepository.ConfirmChangePassword(code,email,changePasswordModel));
+            return Ok(await _authenRepository.ConfirmChangePassword(code, email, changePasswordModel));
         }
     }
 }

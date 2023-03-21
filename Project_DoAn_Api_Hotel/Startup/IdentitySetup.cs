@@ -7,14 +7,23 @@ namespace Project_DoAn_Api_Hotel.Startup
     {
         public static IServiceCollection IdentityService(this IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>(option =>
+            var lockoutOptions = new LockoutOptions()
             {
-                option.SignIn.RequireConfirmedEmail = true;
-                option.User.RequireUniqueEmail = true;
-                option.Password.RequireDigit = false;
-                option.Password.RequireUppercase = false;
-                option.Password.RequireNonAlphanumeric = false;
-                option.Password.RequiredUniqueChars = 0;
+                AllowedForNewUsers = true,
+                DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1),
+                MaxFailedAccessAttempts = 3
+            };
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredLength = 6;
+                options.Lockout = lockoutOptions;
             })
                 .AddEntityFrameworkStores<MyDBContext>()
                 .AddDefaultTokenProviders();

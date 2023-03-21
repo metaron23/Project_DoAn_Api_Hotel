@@ -8,7 +8,6 @@ using Project_DoAn_Api_Hotel.Repository.EmailRepository;
 using Project_DoAn_Api_Hotel.Repository.TokenRepository;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Web;
 
 namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
 {
@@ -37,75 +36,87 @@ namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
             _mailRepository = mailRepository;
         }
 
-        public async Task<LoginResponse> Login([FromBody] LoginModel model)
+        public async Task<object> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email!);
-            var check = await _signInManager.CheckPasswordSignInAsync(user, model.Password!, false);
-            if (check.Succeeded)
+
+            if (user != null)
             {
-
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                var authClaims = new List<Claim>
+                if (user.LockoutEnd >= DateTime.Now)
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    return
+                    new Status
+                    {
+                        StatusCode = 0,
+                        Message = "Tài khoản đã bị khoá vì nhập sai 3 lần! Thời gian mở khoá là: " + user.LockoutEnd.Value.AddHours(7),
+                    };
+                }
+                var check = await _signInManager.CheckPasswordSignInAsync(user, model.Password!, true);
+
+                if (check.Succeeded)
+                {
+                    var userRoles = await _userManager.GetRolesAsync(user);
+
+                    var authClaims = new List<Claim>
+                {
+                    new Claim("UserName", user.UserName!),
+                    new Claim("Email", user.Email!),
+                    new Claim("Id", Guid.NewGuid().ToString()),
                 };
 
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var token = _tokenService.GetAccessToken(authClaims);
-                var refreshToken = _tokenService.GetRefreshToken();
-                var tokenInfo = _context.TokenInfo.FirstOrDefault(a => a.Usename == user.UserName);
-
-                if (tokenInfo == null)
-                {
-                    var info = new TokenInfo
+                    foreach (var userRole in userRoles)
                     {
-                        Usename = user.UserName,
+                        authClaims.Add(new Claim("Roles", userRole));
+                    }
+
+                    var token = _tokenService.GetAccessToken(authClaims);
+                    var refreshToken = _tokenService.GetRefreshToken();
+                    var tokenInfo = _context.TokenInfo.FirstOrDefault(a => a.Usename == user.UserName);
+
+                    if (tokenInfo == null)
+                    {
+                        var info = new TokenInfo
+                        {
+                            Usename = user.UserName,
+                            RefreshToken = refreshToken,
+                            RefreshTokenExpiry = DateTime.Now.AddMinutes(5)
+                        };
+                        _context.TokenInfo.Add(info);
+                    }
+                    else
+                    {
+                        tokenInfo.RefreshToken = refreshToken;
+                        tokenInfo.RefreshTokenExpiry = DateTime.Now.AddMinutes(5);
+                    }
+                    try
+                    {
+                        _context.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        new Status
+                        {
+                            StatusCode = 0,
+                            Message = ex.Message,
+                        };
+                    }
+
+                    return new LoginResponse
+                    {
+                        AccessToken = token.TokenString,
                         RefreshToken = refreshToken,
-                        RefreshTokenExpiry = DateTime.Now.AddMinutes(5)
                     };
-                    _context.TokenInfo.Add(info);
                 }
                 else
                 {
-                    tokenInfo.RefreshToken = refreshToken;
-                    tokenInfo.RefreshTokenExpiry = DateTime.Now.AddMinutes(5);
+                    await _userManager.AccessFailedAsync(user);
                 }
-                try
-                {
-                    _context.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    new LoginResponse
-                    {
-                        StatusCode = 0,
-                        Message = ex.Message,
-                    };
-                }
-
-                return new LoginResponse
-                {
-                    Email = user.Email,
-                    Username = user.UserName,
-                    Token = token.TokenString,
-                    RefreshToken = refreshToken,
-                    Expiration = token.ValidTo,
-                    StatusCode = 1,
-                    Message = "Logged in"
-                };
             }
-            return
-                new LoginResponse
-                {
-                    StatusCode = 0,
-                    Message = "Invalid Username or Password",
-                };
+            return new Status
+            {
+                StatusCode = 0,
+                Message = "Sai email hoặc mật khẩu!",
+            };
         }
 
         public async Task<Status> Registration([FromBody] RegistrationModel model)
@@ -114,30 +125,42 @@ namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
             if (!ModelState.IsValid)
             {
                 status.StatusCode = 0;
-                status.Message = "Please pass all the required fields";
+                status.Message = "Vui lòng điền đủ thông tin đăng ký";
                 return status;
             }
             // check if user exists
-            var userExists = await _userManager.FindByNameAsync(model.UserName);
-            if (userExists != null)
+            var userExistsEmail = await _userManager.FindByEmailAsync(model.Email);
+            var userExistsUserName = await _userManager.FindByNameAsync(model.UserName);
+
+            if (userExistsEmail != null)
             {
                 status.StatusCode = 0;
-                status.Message = "Invalid username";
+                status.Message = "Email đã tồn tại trong hệ thống";
                 return status;
             }
+            if (userExistsUserName != null)
+            {
+                status.StatusCode = 0;
+                status.Message = "UseName đã tồn tại trong hệ thống";
+                return status;
+            }
+
             var user = new ApplicationUser
             {
                 UserName = model.UserName,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Email = model.Email,
-                Name = model.Name
+                Name = model.Name,
+                PhoneNumber = model.PhoneNumber
             };
+            user.EmailConfirmed = true;
             // create a user here
             var result = await _userManager.CreateAsync(user, model.Password);
+
             if (!result.Succeeded)
             {
                 status.StatusCode = 0;
-                status.Message = "User creation failed";
+                status.Message = "Dữ liệu đủ, nhưng tạo mới tài khoản User lỗi!";
                 return status;
             }
 
@@ -148,21 +171,23 @@ namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
             }
+
             status.StatusCode = 1;
-            status.Message = "Sucessfully registered";
+            status.Message = "Tạo mới thành công";
 
-            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            string codeHtmlVersion = HttpUtility.UrlEncode(code);
 
-            string callbackUrl = "https://localhost:7075/api/Authorization/ConfirmEmailRegiste?email=" +
-                user.Email + "&code=" + codeHtmlVersion;
+            //string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //string codeHtmlVersion = HttpUtility.UrlEncode(code);
 
-            _mailRepository.Email(new EmailRequest
-            {
-                To = user.Email,
-                Subject = "Mail confim registed",
-                Body = "<a href=\"" + callbackUrl + "\">Link Confim</a>"
-            });
+            //string callbackUrl = "https://localhost:7075/api/Authorization/ConfirmEmailRegiste?email=" +
+            //    user.Email + "&code=" + codeHtmlVersion;
+
+            //_mailRepository.Email(new EmailRequest
+            //{
+            //    To = user.Email,
+            //    Subject = "Mail confim registed",
+            //    Body = "<a href=\"" + callbackUrl + "\">Link Confim</a>"
+            //});
 
             return status;
         }
@@ -243,15 +268,15 @@ namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
                 _mailRepository.Email(new EmailRequest
                 {
                     To = user.Email,
-                    Subject = "Mail confim change pass",
-                    Body = "New password: " + password
+                    Subject = "Mail reset mật khẩu tài khoản!",
+                    Body = "Chào bạn, " + user.Name + "! Mật khẩu mới của bạn là: " + password + ". Vui lòng không đổi mật khẩu mới sau khi đăng nhập tài khoản!"
                 });
                 status.StatusCode = 1;
-                status.Message = "Please check email to change successfully";
+                status.Message = "Vui lòng kiểm tra hòm thử để nhận mật khẩu mới!";
                 return status;
             }
             status.StatusCode = 0;
-            status.Message = "Error while change password";
+            status.Message = "Có lỗi trong quá trình reset mật khẩu mới! Vui lòng thử lại!";
             return status;
         }
 

@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Project_DoAn_Api_Hotel.Model;
 using Project_DoAn_Api_Hotel.Model.Authentication;
-using Project_DoAn_Api_Hotel.Models;
 
 namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository
 {
     public interface IAuthenRepository
     {
         //Login
-        Task<LoginResponse> Login([FromBody] LoginModel model);
+        Task<object> Login([FromBody] LoginModel model);
         //Register and send mail confirm
         Task<Status> Registration([FromBody] RegistrationModel model);
         //Register with admin
