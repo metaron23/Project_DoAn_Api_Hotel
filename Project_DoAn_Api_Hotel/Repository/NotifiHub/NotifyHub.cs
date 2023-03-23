@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.SignalR;
+using NuGet.Protocol;
+using System.Security.Claims;
 
 namespace Project_DoAn_Api_Hotel.Repository.NotifiHub
 {
@@ -21,11 +22,22 @@ namespace Project_DoAn_Api_Hotel.Repository.NotifiHub
             }
         }
 
+        public void SendChatMessageAuto(string message)
+        {
+            string name = Context.User.Claims.SingleOrDefault(a => a.Type == "UserName").ToString();
+            Clients.Caller.ReceiveMessage("admin", "Đã nhận tin nhắn");
+        }
+
         public override Task OnConnectedAsync()
         {
-            string name = Context.User.Identity.Name;
-
-            _connections.Add(name, Context.ConnectionId);
+            var name = Context.User.Claims.ToList();
+            foreach(var claim in name)
+            {
+                if(claim.Type == "UserName")
+                {
+                    _connections.Add(claim.Value, Context.ConnectionId);
+                }                
+            }           
 
             return base.OnConnectedAsync();
         }

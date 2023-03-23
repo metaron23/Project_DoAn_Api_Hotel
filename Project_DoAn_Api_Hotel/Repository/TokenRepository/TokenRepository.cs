@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Project_DoAn_Api_Hotel.Data;
+using Project_DoAn_Api_Hotel.Model;
 using Project_DoAn_Api_Hotel.Model.Token;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -69,7 +70,7 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddMinutes(2),
+                expires: DateTime.Now.AddMinutes(1),
                 claims: claim,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
@@ -79,7 +80,7 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
             return new AccessTokenResponse { TokenString = tokenString, ValidTo = token.ValidTo };
         }
 
-        public TokenResponse RefreshToken(TokenRequest tokenRequest)
+        public object RefreshToken(TokenRequest tokenRequest)
         {
             var tokenResponse = _mapper.Map<TokenResponse>(tokenRequest);
 
@@ -87,18 +88,20 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
             string refreshToken = tokenRequest.RefreshToken;
 
             var principal = GetPrincipalFromExpiredToken(accessToken);
-            var username = principal.Identity!.Name;
+            var username = principal.FindFirstValue("UserName");
 
             var user = _context.TokenInfo.SingleOrDefault(u => u.Usename == username);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry <= DateTime.Now)
             {
-                tokenResponse.Status = false;
-                return tokenResponse;
+                return new Status
+                {
+                    StatusCode = 0,
+                    Message = "refreshToken sai hoặc đã hết hạn"
+                };
             }
 
             tokenResponse.AccessToken = GetAccessToken(principal.Claims).TokenString!;
-            tokenResponse.Status = true;
 
             var newRefreshToken = GetRefreshToken();
             user.RefreshToken = newRefreshToken;
@@ -117,7 +120,7 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
             var principal = GetPrincipalFromExpiredToken(accessToken);
             try
             {
-                var username = principal.Identity!.Name;
+                var username = principal.FindFirstValue("UserName");
                 var user = _context.TokenInfo.SingleOrDefault(u => u.Usename == username);
                 if (user is null)
                 {

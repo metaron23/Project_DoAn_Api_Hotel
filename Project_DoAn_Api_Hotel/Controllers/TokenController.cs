@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Project_DoAn_Api_Hotel.Model;
 using Project_DoAn_Api_Hotel.Model.Token;
 using Project_DoAn_Api_Hotel.Repository.TokenRepository;
@@ -8,7 +7,6 @@ namespace Project_DoAn_Api_Hotel.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]
     public class TokenController : ControllerBase
     {
         private readonly ITokenRepository _service;
@@ -22,13 +20,9 @@ namespace Project_DoAn_Api_Hotel.Controllers
         public IActionResult Refresh(TokenRequest tokenRequest)
         {
             var token = _service.RefreshToken(tokenRequest);
-            if (!token.Status)
+            if (token is Status)
             {
-                return BadRequest(new Status
-                {
-                    StatusCode = 0,
-                    Message = "Token Isvalid"
-                });
+                return BadRequest(token);
             }
             return Ok(token);
         }

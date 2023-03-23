@@ -8,7 +8,7 @@ namespace Project_DoAn_Api_Hotel.Repository.TokenRepository
         AccessTokenResponse GetAccessToken(IEnumerable<Claim> claim);
         string GetRefreshToken();
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
-        TokenResponse RefreshToken(TokenRequest tokenRequest);
+        object RefreshToken(TokenRequest tokenRequest);
         bool Revoke(TokenRequest tokenRequest);
     }
 }

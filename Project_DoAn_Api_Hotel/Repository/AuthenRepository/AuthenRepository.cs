@@ -6,7 +6,6 @@ using Project_DoAn_Api_Hotel.Model.Authentication;
 using Project_DoAn_Api_Hotel.Models;
 using Project_DoAn_Api_Hotel.Repository.EmailRepository;
 using Project_DoAn_Api_Hotel.Repository.TokenRepository;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Project_DoAn_Api_Hotel.Repository.AuthenRepository

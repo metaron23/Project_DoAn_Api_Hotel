@@ -19,7 +19,7 @@ builder.Services.RepositoryService();
 builder.Services.AuthorService();
 
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddAzureSignalR();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -31,14 +31,15 @@ app.UseHttpsRedirection();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.MapHub<ChatHub>("/hub");
+app.UseFileServer();
 app.UseCors(builder =>
 {
-    builder.WithOrigins("http://127.0.0.1:5500")
+    builder.WithOrigins("http://127.0.0.1:5500", "http://localhost:4200")
            .AllowAnyMethod()
            .AllowAnyHeader()
            .AllowCredentials();
 });
+app.MapHub<ChatHub>("/hub");
 app.UseAuthentication();
 app.UseAuthorization();
 
