@@ -2,8 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Project_DoAn_Api_Hotel.Data;
 using Project_DoAn_Api_Hotel.Repository.NotifiHub;
 using Project_DoAn_Api_Hotel.Startup;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
 builder.Services.AddCors();
 // Add services to the container.
 builder.Services.AddControllers();
@@ -11,7 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.SwaggerService();
 
 builder.Services.AddDbContext<MyDBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection")));
 
 builder.Services.IdentityService();
 builder.AuthenJWTService();

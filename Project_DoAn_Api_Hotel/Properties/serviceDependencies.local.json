@@ -1,17 +1,35 @@
 {
   "dependencies": {
+    "identityapp1": {
+      "ignored": "true",
+      "type": "identityapp"
+    },
     "secrets1": {
-      "type": "secrets.user"
+      "type": "secrets.user",
+      "dynamicId": null
+    },
+    "secrets2": {
+      "secretStore": null,
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/ProjectDoAnApiHotelvault",
+      "type": "secrets.keyVault",
+      "connectionId": "VaultUri",
+      "dynamicId": null
     },
     "mssql1": {
       "secretStore": "LocalSecretsFile",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/project-doan-api-hoteldbserver/databases/Project_Hotel_Api",
-      "type": "mssql.azure",
-      "connectionId": "ConnectionStrings:MyDB",
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:defaultConnection",
+      "dynamicId": null
+    },
+    "signalr1": {
+      "secretStore": "LocalSecretsFile",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.SignalRService/SignalR/ProjectDoAnApiHotel",
+      "type": "signalr.azure",
+      "connectionId": "Azure:SignalR:ConnectionString",
       "dynamicId": null
     },
     "apis1": {
-      "ignored": "true",
+      "ignored": "True",
       "type": "apis"
     }
   }

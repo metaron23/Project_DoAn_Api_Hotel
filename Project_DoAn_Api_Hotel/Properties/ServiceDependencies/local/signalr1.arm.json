@@ -36,7 +36,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "name": "[concat(parameters('resourceGroupName'), 'Deployment', uniqueString(concat('Project_Hotel_Api', subscription().subscriptionId)))]",
+      "name": "[concat(parameters('resourceGroupName'), 'Deployment', uniqueString(concat('ProjectDoAnApiHotel', subscription().subscriptionId)))]",
       "resourceGroup": "[parameters('resourceGroupName')]",
       "apiVersion": "2019-10-01",
       "dependsOn": [
@@ -49,26 +49,16 @@
           "contentVersion": "1.0.0.0",
           "resources": [
             {
-              "kind": "v12.0",
-              "location": "[parameters('resourceLocation')]",
-              "name": "project-doan-api-hoteldbserver",
-              "type": "Microsoft.Sql/servers",
-              "apiVersion": "2017-10-01-preview"
-            },
-            {
               "sku": {
-                "name": "Premium",
-                "tier": "Premium",
-                "capacity": 125
+                "name": "Free_F1",
+                "tier": "Free",
+                "size": "F1",
+                "capacity": 1
               },
-              "kind": "v12.0,user",
               "location": "[parameters('resourceLocation')]",
-              "name": "project-doan-api-hoteldbserver/Project_Hotel_Api",
-              "type": "Microsoft.Sql/servers/databases",
-              "apiVersion": "2017-10-01-preview",
-              "dependsOn": [
-                "project-doan-api-hoteldbserver"
-              ]
+              "name": "ProjectDoAnApiHotel",
+              "type": "Microsoft.SignalRService/SignalR",
+              "apiVersion": "2018-10-01"
             }
           ]
         }
@@ -76,6 +66,6 @@
     }
   ],
   "metadata": {
-    "_dependencyType": "mssql.azure"
+    "_dependencyType": "signalr.azure"
   }
 }

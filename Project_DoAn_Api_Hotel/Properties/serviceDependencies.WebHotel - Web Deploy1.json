@@ -1,14 +1,14 @@
 {
   "dependencies": {
-    "apis1": {
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/ProjectDoAnApiHotel/apis/ProjectDoAnApiHotel",
-      "type": "apis.azure"
+    "identityapp1": {
+      "ignored": "true",
+      "type": "identityapp"
     },
-    "mssql1": {
+    "signalr1": {
       "secretStore": "AzureAppSettings",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/project-doan-api-hoteldbserver/databases/Project_Hotel_Api",
-      "type": "mssql.azure",
-      "connectionId": "ConnectionStrings:MyDB",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.SignalRService/SignalR/ProjectDoAnApiHotel",
+      "type": "signalr.azure",
+      "connectionId": "Azure:SignalR:ConnectionString",
       "dynamicId": null
     },
     "secrets1": {
@@ -18,11 +18,16 @@
       "connectionId": "VaultUri",
       "dynamicId": null
     },
-    "signalr1": {
+    "mssql2": {
       "secretStore": "AzureAppSettings",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.SignalRService/SignalR/ProjectDoAnApiHotel",
-      "type": "signalr.azure",
-      "connectionId": "Azure:SignalR:ConnectionString"
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:defaultConnection",
+      "dynamicId": null
+    },
+    "apis1": {
+      "apiEndpoint": "https://projectdoanapihotel.azure-api.net/",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/ProjectDoAnApiHotel/apis/ProjectDoAnApiHotel",
+      "type": "apis.azure"
     }
   }
 }

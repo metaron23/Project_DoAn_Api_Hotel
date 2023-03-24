@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using NuGet.Protocol;
-using System.Security.Claims;
 
 namespace Project_DoAn_Api_Hotel.Repository.NotifiHub
 {
@@ -31,13 +29,13 @@ namespace Project_DoAn_Api_Hotel.Repository.NotifiHub
         public override Task OnConnectedAsync()
         {
             var name = Context.User.Claims.ToList();
-            foreach(var claim in name)
+            foreach (var claim in name)
             {
-                if(claim.Type == "UserName")
+                if (claim.Type == "UserName")
                 {
                     _connections.Add(claim.Value, Context.ConnectionId);
-                }                
-            }           
+                }
+            }
 
             return base.OnConnectedAsync();
         }

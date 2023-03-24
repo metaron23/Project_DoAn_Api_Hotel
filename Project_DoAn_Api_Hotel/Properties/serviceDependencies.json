@@ -1,21 +1,32 @@
 {
   "dependencies": {
-    "mssql1": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:MyDB",
-      "dynamicId": null
-    },
     "secrets1": {
       "type": "secrets",
       "connectionId": "VaultUri",
       "dynamicId": null
     },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:defaultConnection",
+      "dynamicId": null
+    },
     "apis1": {
       "type": "apis"
     },
+    "secrets2": {
+      "type": "secrets",
+      "connectionId": "VaultUri",
+      "dynamicId": null
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:defaultConnection",
+      "dynamicId": null
+    },
     "signalr1": {
       "type": "signalr",
-      "connectionId": "Azure:SignalR:ConnectionString"
+      "connectionId": "Azure:SignalR:ConnectionString",
+      "dynamicId": null
     }
   }
 }
